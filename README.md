@@ -14,6 +14,10 @@ HackBrain Studio is a distributed execution architecture and observability platf
 ### HackBrain v2: The Observability Mesh
 **Objective:** To build a fully distributed, physics-level observability instrument. The goal was to take the V1 theoretical core and deploy it across an encrypted Tailscale network, allowing a centralized Mac Observatory (React/Vite) to securely trigger, monitor, and visually trace kernel-level execution states on a remote Ubuntu bare-metal server in real-time.
 
+### Why We Built v1 Then v2
+- **Why v1?** We had to build v1 first to prove the raw physics of the system. We needed to ensure we could successfully isolate processes using Docker, intercept raw kernel output (`stdout`/`stderr`), compute deterministic hashes, and enforce a physical Write-Ahead Log locally. We had to prove the ledger was mathematically sound before adding networking complexity.
+- **Why v2?** Once the v1 physics were proven, we hit a severe limitation: staring at a raw Ubuntu terminal is entirely unscalable for massive, multi-day biological workloads running in remote data centers. We needed to decouple the **Observer** (the researcher on their Mac) from the **Execution Plane** (the Linux server). HackBrain v2 projects the verified v1 physics across a distributed mesh into a beautiful visual dashboard without compromising the strict sandboxing.
+
 ---
 
 ## 🏗️ Repository Structure
