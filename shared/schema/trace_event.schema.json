@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TraceEvent",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the write event"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Causal parent event ID, if applicable"
+    },
+    "logical_time": {
+      "type": "integer",
+      "description": "Sequential or Lamport timestamp from the writer"
+    },
+    "wall_time": {
+      "type": "integer",
+      "description": "Unix timestamp in nanoseconds from user space"
+    },
+    "write_state": {
+      "type": "string",
+      "enum": ["committed", "pending", "flushed"],
+      "description": "The user-space intent state of the write"
+    },
+    "survival_state": {
+      "type": "string",
+      "enum": ["persisted", "lost", "unknown"],
+      "description": "The post-crash empirically verified survival status"
+    },
+    "artifact_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the artifact file containing this event to ensure reproducible deterministic replay"
+    }
+  },
+  "required": [
+    "id",
+    "logical_time",
+    "wall_time",
+    "write_state",
+    "survival_state",
+    "artifact_hash"
+  ]
+}

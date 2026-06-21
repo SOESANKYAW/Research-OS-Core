@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JobManifest",
+  "type": "object",
+  "description": "The immutable execution contract for a sandboxed HackBrain job.",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique identifier for the job."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "SCHEDULED", "RUNNING", "COMPLETED", "SEALED"],
+      "description": "Current state of the job in the execution state machine."
+    },
+    "input_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of all input scripts and assets provided to the job before execution."
+    },
+    "image_hash": {
+      "type": "string",
+      "description": "Docker image tag or SHA-256 hash defining the strictly isolated container environment."
+    },
+    "command": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "The command array to execute within the container (e.g., ['python', 'analyze.py'])."
+    },
+    "mount_spec": {
+      "type": "string",
+      "description": "The explicit volume mount string binding the host job directory to the container /job/workdir."
+    },
+    "artifact_manifest": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Array of artifact hashes generated and sealed by this job."
+    }
+  },
+  "required": [
+    "job_id",
+    "status",
+    "input_hash",
+    "image_hash",
+    "command",
+    "mount_spec",
+    "artifact_manifest"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Artifact",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this artifact record"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["wal_segment", "crash_dump", "file_snapshot", "metrics_log"],
+      "description": "The type of the experimental artifact"
+    },
+    "path": {
+      "type": "string",
+      "description": "File path relative to the sync directory"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "description": "Size of the artifact file"
+    },
+    "hash": {
+      "type": "string",
+      "description": "SHA-256 fingerprint for replay validation and corruption detection"
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Unix timestamp (ms) of when the artifact was captured/synced"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "path",
+    "size_bytes",
+    "hash",
+    "timestamp"
+  ]
+}

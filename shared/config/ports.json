@@ -1,0 +1,6 @@
+{
+  "control_agent_port": 4001,
+  "studio_v2_port": 3333,
+  "studio_v1_port": 5173,
+  "hackbrain_hub_port": 8765
+}
