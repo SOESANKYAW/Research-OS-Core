@@ -6,6 +6,16 @@ HackBrain Studio is a distributed execution architecture and observability platf
 
 ---
 
+## 🎯 Core Objectives
+
+### HackBrain v1: The Theoretical Foundation
+**Objective:** To build a mathematically deterministic execution ledger. The goal was to prove we could intercept raw OS-level commands, hash inputs deterministically, and enforce a strict Write-Ahead Log (WAL) to guarantee zero-data-loss execution and perfect reproducibility, even during power failures.
+
+### HackBrain v2: The Observability Mesh
+**Objective:** To build a fully distributed, physics-level observability instrument. The goal was to take the V1 theoretical core and deploy it across an encrypted Tailscale network, allowing a centralized Mac Observatory (React/Vite) to securely trigger, monitor, and visually trace kernel-level execution states on a remote Ubuntu bare-metal server in real-time.
+
+---
+
 ## 🏗️ Repository Structure
 
 This repository contains the full evolution of the HackBrain architecture:
@@ -39,6 +49,43 @@ The ultimate source of truth for the system's design.
 
 The system operates across a dual-machine distributed bridge (e.g., Mac $\leftrightarrow$ Ubuntu over Tailscale):
 
+```mermaid
+graph TD
+    subgraph Local Environment [Mac: Command & Observability]
+        Dashboard[HackBrain Studio v2<br/>React / Vite]
+        Terminal[CLI Trigger<br/>curl POST]
+    end
+
+    subgraph Distributed Network [Encrypted Tailscale Mesh]
+        SSE[Server-Sent Events<br/>State Stream]
+        HTTP[HTTP POST<br/>Payload Delivery]
+    end
+
+    subgraph Execution Environment [Ubuntu: Bare Metal Server]
+        Agent[Node Control Agent<br/>Port 4005]
+        EventBus[(In-Memory Event Bus<br/>& Local Log File)]
+        
+        subgraph Sandbox Boundary [Strict Execution Isolation]
+            Docker[Docker Container<br/>python:3.9-slim]
+            WAL[(Bare Metal Disk<br/>Write-Ahead Log)]
+        end
+    end
+
+    %% Connections
+    Terminal -- 1. Submit Job Manifest --> HTTP
+    HTTP --> Agent
+    
+    Dashboard <-- 4. Consume Trace Events -- SSE
+    SSE <-- Agent
+
+    Agent -- 2. Spin up secured container --> Docker
+    Docker -- 3. fsync() state --> WAL
+    Docker -. stdout / stderr .-> Agent
+    
+    Agent --> EventBus
+    EventBus --> Agent
+```
+
 1. The **Control Agent** (`server.js`) runs indefinitely on the execution server, listening on port `4005`.
 2. The **Observatory Dashboard** runs locally on the command node (`npm run dev`).
 3. Execution payloads are defined as JSON manifests and fired across the network using standard Unix tools (`curl`).
@@ -57,8 +104,61 @@ curl -X POST http://<execution-node-ip>:4005/api/submit_job \
 
 ---
 
-## 🛡️ Chaos Engineering Proven
+## 🛡️ Chaos Engineering & Deterministic State
 
 This architecture has been physically stressed using Write-Ahead Log (WAL) mechanics. By forcing aggressive `kill -9` container terminations during synchronous disk I/O, we successfully verified that this distributed network accurately traces kernel-level terminations and effortlessly supports monotonic state recovery.
+
+### Trace Lifecycle State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> RECEIVED: Payload Intercepted by Agent
+    RECEIVED --> SCHEDULED: Validated & Hashed
+    
+    SCHEDULED --> RUNNING: Sandbox Booted
+    
+    state RUNNING {
+        [*] --> D1_STABLE: fsync() successful
+        D1_STABLE --> D1_STABLE: Compute Loop
+        D1_STABLE --> CRASH: kill -9 (Hardware Failure)
+        CRASH --> RECOVERY: Payload Retriggered
+        RECOVERY --> D1_STABLE: WAL Read
+    }
+    
+    RUNNING --> COMPLETED: Graceful Exit 0
+    RUNNING --> FAILED: Exit > 0
+    
+    COMPLETED --> SEALED: Artifacts Hashed
+    FAILED --> [*]
+    SEALED --> [*]
+```
+
+### Node.js Asynchronous Pipeline
+
+```mermaid
+sequenceDiagram
+    participant User as Mac Terminal
+    participant Express as Node Server
+    participant Bus as EventBus (SSE)
+    participant Exec as LocalExecutor
+    participant Docker as Sandbox
+
+    User->>Express: POST /api/submit_job
+    Express->>Bus: Dispatch "SCHEDULED"
+    Bus-->>Mac Dashboard: SSE Event Stream
+    Express-->>User: HTTP 200 (Job Accepted)
+    
+    Note over Express, Docker: Asynchronous Execution (Non-Blocking)
+    Express->>Exec: dispatchJob()
+    Exec->>Bus: Dispatch "RUNNING"
+    Exec->>Docker: docker run (Strict Mount)
+    
+    loop Physics Execution
+        Docker-->>Exec: stdout: [D1_STABLE] chunk
+    end
+    
+    Docker-->>Exec: Exit Code 0
+    Exec->>Bus: Dispatch "COMPLETED"
+```
 
 *No abstractions. No simulations. Just bare-metal telemetry.*
