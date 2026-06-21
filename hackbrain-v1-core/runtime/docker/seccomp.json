@@ -1,0 +1,42 @@
+{
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "architectures": ["SCMP_ARCH_X86_64"],
+  "syscalls": [
+    {
+      "names": [
+        "read", 
+        "write", 
+        "openat", 
+        "close", 
+        "fstat",
+        "mmap", 
+        "munmap",
+        "brk",
+        "rt_sigaction",
+        "rt_sigprocmask",
+        "exit", 
+        "exit_group",
+        "nanosleep",
+        "getrandom",
+        "futex"
+      ],
+      "action": "SCMP_ACT_ALLOW"
+    },
+    {
+      "names": [
+        "clone", 
+        "unshare", 
+        "mount", 
+        "ptrace", 
+        "bpf",
+        "kexec_load",
+        "kexec_file_load",
+        "perf_event_open",
+        "keyctl",
+        "init_module", 
+        "finit_module"
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}

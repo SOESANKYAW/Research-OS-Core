@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+# remove package manager to reduce attack surface
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# no shell persistence tools
+RUN rm -f /bin/sh
+
+# execution runtime only
+COPY runner.py /runner.py
+
+USER 1000:1000
+
+ENTRYPOINT ["python", "/runner.py"]

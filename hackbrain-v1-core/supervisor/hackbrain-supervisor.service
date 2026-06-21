@@ -1,0 +1,21 @@
+[Unit]
+Description=HackBrain Supervisor Daemon
+After=docker.service
+
+[Service]
+ExecStart=/usr/local/bin/supervisor-daemon
+Restart=always
+RestartSec=1
+
+# HARD SAFETY BOUNDARY
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+# Prevent privilege escalation
+CapabilityBoundingSet=CAP_DAC_OVERRIDE CAP_NET_ADMIN
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

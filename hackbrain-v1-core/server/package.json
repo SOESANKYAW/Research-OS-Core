@@ -1,0 +1,15 @@
+{
+  "name": "hackbrain-server",
+  "version": "1.0.0",
+  "description": "HackBrain Node API and Epistemic Choke Point",
+  "main": "wal_writer.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
